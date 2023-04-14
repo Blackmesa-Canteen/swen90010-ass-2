@@ -102,6 +102,33 @@ pred user_recv_pre[m : Message] {
 pred user_send_post[m : Message] {
   State.network' = m and
   // FILL IN HERE
+  // sender update the call state
+  State.calls' =  
+    ( m.type in SDPOffer =>
+        State.calls ++ (m.source -> SignallingOffered)
+      else m.type in SDPAnswer =>
+        State.calls ++ (m.source -> SignallingAnswered)
+      else m.type in SDPCandidates =>
+        State.calls ++ (m.source -> SignallingComplete)
+      else m.type in Connect =>
+        State.calls ++ (m.source -> Connected)
+      else
+        State.calls
+    ) and
+
+  /* Sending the Connect message causes 
+   * the audio to be connected to the message’s destination
+   */
+  State.audio' = 
+    (
+      m.type in Connect =>
+        m.dest
+      else
+        State.audio
+    )
+
+  // other parts of the system is unchanged
+  State.ringing' = State.ringing
 }
 
 // postcondition for the user receiving a message m
@@ -112,6 +139,41 @@ pred user_send_post[m : Message] {
 pred user_recv_post[m : Message] {
   no State.network' and
   // FILL IN HERE
+  // receiver update the call state
+  State.calls' =  
+    ( m.type in SDPOffer =>
+        State.calls ++ (m.dest -> SignallingStart)
+      else m.type in SDPAnswer =>
+        State.calls ++ (m.dest -> SignallingOngoing)
+      else m.type in SDPCandidates =>
+        State.calls ++ (m.dest -> SignallingComplete)
+      else m.type in Connect =>
+        State.calls ++ (m.dest -> Connected)
+      else
+        State.calls
+    ) and
+
+  /* Receiving the SDPCandidates message causes the ringing 
+   * state to be updated to refer to the message’s source address
+   */
+  State.ringing' = 
+    (
+      m.type in SDPCandidates =>
+        m.source
+      else
+        State.ringing
+    ) and
+
+  /* receiving the Connect message causes the audio to be 
+   * connected to the message’s source address.
+   */
+  State.audio' = 
+    (
+      m.type in Connect =>
+        m.source
+      else
+        State.audio
+    )
 }
 
 // the action of the attacker sending a message
