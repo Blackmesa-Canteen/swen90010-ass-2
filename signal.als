@@ -100,6 +100,7 @@ pred user_recv_pre[m : Message] {
 //
 // No need to specify here that last_called and last_answered to not change
 pred user_send_post[m : Message] {
+  // sending a message adds it to the network
   State.network' = m and
   // FILL IN HERE
   // sender update the call state
@@ -137,6 +138,7 @@ pred user_send_post[m : Message] {
 //
 // No need to specify here that last_called and last_answered to not change
 pred user_recv_post[m : Message] {
+  // receiving a message removes it from the network
   no State.network' and
   // FILL IN HERE
   // receiver update the call state
