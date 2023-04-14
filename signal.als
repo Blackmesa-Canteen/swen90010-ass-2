@@ -1,6 +1,7 @@
 
 // Names of you and your partner:
-// FILL IN HERE
+// Xiaotian Li 1141181
+// Junrong Wu 1310531
 
 // the type of addresses
 abstract sig Address {}
