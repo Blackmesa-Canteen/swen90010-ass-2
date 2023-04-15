@@ -103,7 +103,8 @@ pred user_send_post[m : Message] {
   // sending a message adds it to the network
   State.network' = m and
   // FILL IN HERE
-  ((m.type in SDPOffer and 
+  (
+    (m.type in SDPOffer and 
     State.calls' = State.calls + (m.dest -> SignallingOffered) and
     // other parts of the system is unchanged
     State.ringing' = State.ringing and
@@ -129,7 +130,8 @@ pred user_send_post[m : Message] {
     State.audio' = m.dest and
     // other parts of the system is unchanged
     State.ringing' = State.ringing
-    ))
+    )
+  )
 }
 
 // postcondition for the user receiving a message m
@@ -141,7 +143,8 @@ pred user_recv_post[m : Message] {
   // receiving a message removes it from the network
   no State.network' and
   // FILL IN HERE
-  ((m.type in SDPOffer and
+  (
+    (m.type in SDPOffer and
     State.calls' = State.calls + (m.source -> SignallingStart) and
     State.ringing' = State.ringing and
     State.audio' = State.audio) or
@@ -167,7 +170,8 @@ pred user_recv_post[m : Message] {
     /* receiving the Connect message causes the audio to be 
     * connected to the message’s source address.
     */
-    State.audio' = m.source))
+    State.audio' = m.source)
+  )
 }
 
 // the action of the attacker sending a message
