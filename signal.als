@@ -263,35 +263,38 @@ fact {
   always state_transition
 }
 
-
-
 // a  bad state is one in which the User's audio is connected
 // to a participant but the User has not yet decided to call that
 // participant or to answer a call from them
 assert no_bad_states {
  // FILL IN HERE
- // for all states in transitions
- always all s : State |
-  (
-    // for all existing users
-    all user : Address {
+ // always for all users and message
+ always all user : Address, m : Message {
       // if the user address is in audio
-      user in s.audio implies 
+      user in State.audio implies 
+      (
+        // if the user is audio destination
         (
-          // if the user is audio destination
-          (
-            // the user should be in Answered state
-            s.calls[user] in Answered
-          ) or
+          // the user should be in Answered state
+          State.calls[user] = Answered and
+          // if the message is in state, 
+          // then the message source matches user's latest answered address
+          m in State.network implies 
+            (m.source = State.last_answered)
+        ) 
+        
+        or
 
-          // if the user is audio source
-          (
-            // the user should be in SignallingComplete state
-            s.calls[user] in SignallingComplete
-          )
+        // if the user is audio source
+        (
+          // the user should be in SignallingComplete state
+          State.calls[user] = SignallingComplete and
+          // check destination matches user's need
+          m in State.network implies 
+            (m.dest = State.last_called)
         )
-    }
-  )
+      )
+    }  
 }
 
 // describe the vulnerability that this check identified
