@@ -313,7 +313,9 @@ pred one_run {
       State.audio = callee
 }
 
-// (2) makes call and reveive from another
+// (2) in one state their audio is connected 
+// to one participant and in another state it is connected to some
+// other participant
 pred two_run {
   some one_user, another_user : Address |
     State.audio = one_user and 
