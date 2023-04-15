@@ -103,33 +103,33 @@ pred user_send_post[m : Message] {
   // sending a message adds it to the network
   State.network' = m and
   // FILL IN HERE
-  // sender update the call state
-  State.calls' =  
-    ( m.type in SDPOffer =>
-        State.calls ++ (m.source -> SignallingOffered)
-      else m.type in SDPAnswer =>
-        State.calls ++ (m.source -> SignallingAnswered)
-      else m.type in SDPCandidates =>
-        State.calls ++ (m.source -> SignallingComplete)
-      else m.type in Connect =>
-        State.calls ++ (m.source -> Connected)
-      else
-        State.calls
-    ) and
+  ((m.type in SDPOffer and 
+    State.calls' = State.calls + (m.dest -> SignallingOffered) and
+    // other parts of the system is unchanged
+    State.ringing' = State.ringing and
+    State.audio' = State.audio) or
 
-  /* Sending the Connect message causes 
-   * the audio to be connected to the message’s destination
-   */
-  State.audio' = 
-    (
-      m.type in Connect =>
-        m.dest
-      else
-        State.audio
-    )
+   (m.type in SDPAnswer and 
+    State.calls' = State.calls ++ (m.dest -> SignallingAnswered) and
+    // other parts of the system is unchanged
+    State.ringing' = State.ringing and
+    State.audio' = State.audio) or   
 
-  // other parts of the system is unchanged
-  State.ringing' = State.ringing
+   (m.type in SDPCandidates and 
+    State.calls' = State.calls ++ (m.dest -> SignallingComplete) and
+    // other parts of the system is unchanged
+    State.ringing' = State.ringing and
+    State.audio' = State.audio) or  
+
+   (m.type in Connect and 
+    State.calls' = State.calls and
+    /* Sending the Connect message causes 
+     * the audio to be connected to the message’s destination
+     */
+    State.audio' = m.dest and
+    // other parts of the system is unchanged
+    State.ringing' = State.ringing
+    ))
 }
 
 // postcondition for the user receiving a message m
@@ -141,41 +141,33 @@ pred user_recv_post[m : Message] {
   // receiving a message removes it from the network
   no State.network' and
   // FILL IN HERE
-  // receiver update the call state
-  State.calls' =  
-    ( m.type in SDPOffer =>
-        State.calls ++ (m.dest -> SignallingStart)
-      else m.type in SDPAnswer =>
-        State.calls ++ (m.dest -> SignallingOngoing)
-      else m.type in SDPCandidates =>
-        State.calls ++ (m.dest -> SignallingComplete)
-      else m.type in Connect =>
-        State.calls ++ (m.dest -> Connected)
-      else
-        State.calls
-    ) and
+  ((m.type in SDPOffer and
+    State.calls' = State.calls + (m.source -> SignallingStart) and
+    State.ringing' = State.ringing and
+    State.audio' = State.audio) or
 
-  /* Receiving the SDPCandidates message causes the ringing 
-   * state to be updated to refer to the message’s source address
-   */
-  State.ringing' = 
-    (
-      m.type in SDPCandidates =>
-        m.source
-      else
-        State.ringing
-    ) and
+   (m.type in SDPAnswer and
+    State.calls' = State.calls ++ (m.source -> SignallingOngoing) and
+    State.ringing' = State.ringing and
+    State.audio' = State.audio) or
 
-  /* receiving the Connect message causes the audio to be 
-   * connected to the message’s source address.
-   */
-  State.audio' = 
-    (
-      m.type in Connect =>
-        m.source
-      else
-        State.audio
-    )
+   (m.type in SDPCandidates and
+    State.calls' = State.calls ++ (m.source -> SignallingComplete) and
+
+    /* Receiving the SDPCandidates message causes the ringing 
+    * state to be updated to refer to the message’s source address
+    */
+    State.ringing' = m.source and
+    State.audio' = State.audio) or
+
+   (m.type in Connect and
+    State.calls' = State.calls and
+    State.ringing' = State.ringing and
+
+    /* receiving the Connect message causes the audio to be 
+    * connected to the message’s source address.
+    */
+    State.audio' = m.source))
 }
 
 // the action of the attacker sending a message
@@ -268,32 +260,13 @@ fact {
 // participant or to answer a call from them
 assert no_bad_states {
  // FILL IN HERE
- // always for all users and message
- always all user : Address, m : Message | (
-
-      // if the user address is in audio
-      (user in State.audio) implies (
-        // if the user is audio destination
-        (
-          // the user should be in Answered state
-          State.calls[user] = Answered and
-          // if the message is in state, 
-          // then the message source matches user's latest answered address
-          m in State.network implies 
-            (m.source = State.last_answered)
-        ) 
-        
-        or
-
-        // if the user is audio source
-        (
-          // the user should be in SignallingComplete state
-          State.calls[user] = SignallingComplete and
-          // check destination matches user's need
-          m in State.network implies 
-            (m.dest = State.last_called)
-        ))
- ) 
+ not {
+  // the bad state
+  some participant : Address |
+    State.audio = participant and 
+    no State.last_answered and 
+    no State.last_called
+ }
 }
 
 // describe the vulnerability that this check identified
