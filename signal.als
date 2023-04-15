@@ -90,7 +90,13 @@ pred user_recv_pre[m : Message] {
    (m.type in SDPAnswer and State.calls[m.source] = SignallingOffered) or
    (m.type in SDPCandidates and State.calls[m.source] = SignallingAnswered) or
    (m.type in Connect 
-    and State.calls[m.source] = SignallingComplete)
+    and State.calls[m.source] = SignallingComplete
+
+   /* FIX: Before receive message, 
+    * check whether the source is match the record 
+    */
+    // and State.last_called = m.source
+   )
   )
 }
 
@@ -259,18 +265,21 @@ fact {
   always state_transition
 }
 
+// my_bad_state: the user does not have target, but audio still setup
+pred my_bad_state[s : State] {
+  some participant : Address |
+    s.audio = participant and 
+    no s.last_answered and 
+    no s.last_called
+}
+
 // a  bad state is one in which the User's audio is connected
 // to a participant but the User has not yet decided to call that
 // participant or to answer a call from them
 assert no_bad_states {
  // FILL IN HERE
- not {
-  // the bad state
-  some participant : Address |
-    State.audio = participant and 
-    no State.last_answered and 
-    no State.last_called
- }
+ // for all states in the system, no bad state will occur
+ all s : State | not my_bad_state[s]
 }
 
 // describe the vulnerability that this check identified
@@ -278,6 +287,12 @@ assert no_bad_states {
 // implemented and then run this "check" to make sure the vulnerability
 // can be seen as described here.
 // FILL IN HERE
+
+/* When user is receiving message, system will not check whether the
+ * message source matches the last callee that the User called or not.
+ * As a result, attckers can freely setup a audio connection with client.
+ * See: FIX comment
+ */
 
 // Choose a suitable bound for this check to show hwo the
 // vulnerability does not arise in your fixed protocol
