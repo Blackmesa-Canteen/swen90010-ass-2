@@ -270,6 +270,28 @@ fact {
 // participant or to answer a call from them
 assert no_bad_states {
  // FILL IN HERE
+ // for all states in transitions
+ always all s : State |
+  (
+    // for all existing users
+    all user : Address {
+      // if the user address is in audio
+      user in s.audio implies 
+        (
+          // if the user is audio destination
+          (
+            // the user should be in Answered state
+            s.calls[user] in Answered
+          ) or
+
+          // if the user is audio source
+          (
+            // the user should be in SignallingComplete state
+            s.calls[user] in SignallingComplete
+          )
+        )
+    }
+  )
 }
 
 // describe the vulnerability that this check identified
