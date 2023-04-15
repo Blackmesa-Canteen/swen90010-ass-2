@@ -129,7 +129,7 @@ pred user_send_post[m : Message] {
     State.audio' = State.audio) or  
 
    (m.type in Connect and 
-    State.calls' = State.calls and
+    State.calls' = State.calls ++ (m.dest -> Connected) and
     /* Sending the Connect message causes 
      * the audio to be connected to the message’s destination
      */
@@ -170,7 +170,7 @@ pred user_recv_post[m : Message] {
     State.audio' = State.audio) or
 
    (m.type in Connect and
-    State.calls' = State.calls and
+    State.calls' = State.calls ++ (m.source -> Connected) and
     State.ringing' = State.ringing and
 
     /* receiving the Connect message causes the audio to be 
@@ -265,14 +265,6 @@ fact {
   always state_transition
 }
 
-// my_bad_state: the user does not have target, but audio still setup
-pred my_bad_state[s : State] {
-  some participant : Address |
-    s.audio = participant and 
-    no s.last_answered and 
-    no s.last_called
-}
-
 // a  bad state is one in which the User's audio is connected
 // to a participant but the User has not yet decided to call that
 // participant or to answer a call from them
@@ -288,11 +280,13 @@ assert no_bad_states {
 // can be seen as described here.
 // FILL IN HERE
 
-/* When user is receiving message, system will not check whether the
- * message source matches the last callee that the User called or not.
- * As a result, attckers can freely setup a audio connection with client.
- * See: FIX comment
- */
+// Bad state
+pred my_bad_state[s : State] {
+  some participant : Address |
+    s.audio = participant and 
+    no s.last_answered and 
+    no s.last_called
+}
 
 // Choose a suitable bound for this check to show hwo the
 // vulnerability does not arise in your fixed protocol
@@ -300,7 +294,7 @@ assert no_bad_states {
 // specifically, what guarantees you think are provided by this check.
 // FILL IN HERE
 // See the assignment handout for more details here.
-check no_bad_states // CHOOSE BOUND HERE
+check no_bad_states for 8 expect 1 // CHOOSE BOUND HERE
 
 // Alloy "run" commands and predicate definitions to
 // showing successful execution of your (fixed) protocol
@@ -313,8 +307,30 @@ check no_bad_states // CHOOSE BOUND HERE
 // to one participant and in another state it is connected to some
 // other participant
 
+// (1) a successful run as caller, audio being connected to callee
+pred one_run {
+    some callee : Address |
+      State.audio = callee
+}
+
+// (2) makes call and reveive from another
+pred two_run {
+  some one_user, another_user : Address |
+    State.audio = one_user and 
+    State.audio' = another_user and 
+    one_user != another_user
+}
+
+
 // Describe how you fixed the model to remove the vulnerability
 // FILL IN HERE
 // Your description should have enough detail to allow somebody
 // to "undo" (or "reverse") your fix so we can then see the vulnerability
 // in your protocol as you describe it in comments above
+
+/* When user is receiving message, system will not check whether the
+ * message source matches the last callee that the User called or not.
+ * As a result, attckers can freely setup a audio connection with client.
+ * 
+ * See: FIX comment in user_recv_pre prediction
+ */
