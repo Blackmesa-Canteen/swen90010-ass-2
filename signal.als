@@ -269,10 +269,10 @@ fact {
 assert no_bad_states {
  // FILL IN HERE
  // always for all users and message
- always all user : Address, m : Message {
+ always all user : Address, m : Message | (
+
       // if the user address is in audio
-      user in State.audio implies 
-      (
+      (user in State.audio) implies (
         // if the user is audio destination
         (
           // the user should be in Answered state
@@ -292,9 +292,8 @@ assert no_bad_states {
           // check destination matches user's need
           m in State.network implies 
             (m.dest = State.last_called)
-        )
-      )
-    }  
+        ))
+ ) 
 }
 
 // describe the vulnerability that this check identified
