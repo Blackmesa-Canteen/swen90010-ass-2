@@ -321,6 +321,13 @@ pred two_run {
     one_user != another_user
 }
 
+// try run 
+run one_run for 8 expect 1
+
+run two_run for 8 expect 1
+
+check no_bad_states for 2 expect 1
+
 
 // Describe how you fixed the model to remove the vulnerability
 // FILL IN HERE
