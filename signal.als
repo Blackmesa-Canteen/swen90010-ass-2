@@ -298,9 +298,13 @@ pred my_bad_state {
 // FILL IN HERE
 // See the assignment handout for more details here.
 
-/** check 2 instances in defalt, but 4 messages instances
- * The this number is tested one by one, and less than 4 messages
+/** 
+ * check 2 instances in defalt, but 4 messages instances
+ * The scope number is tested one by one, and less than 4 messages
  * can not generate counter examples
+ *
+ * From the counter example diagram in Alloy, four messages'
+ * Source fields are Attacker Address.
  *
  * For the fix plan, pls see the last lines of comments in this file
  */
