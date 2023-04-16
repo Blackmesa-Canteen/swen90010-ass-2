@@ -280,9 +280,10 @@ assert no_bad_states {
 // can be seen as described here.
 // FILL IN HERE
 
-// Bad state: the User's audio is connected
-// to a participant but the User has not yet decided to call that
-// participant or to answer a call from them
+/* Bad state: the User's audio is connected
+ * to a participant but the User has not yet decided to call that
+ * participant or to answer a call from them
+ */
 pred my_bad_state {
   some participant : Address |
     State.audio = participant and 
@@ -300,6 +301,8 @@ pred my_bad_state {
 /** check 2 instances in defalt, but 4 messages instances
  * The this number is tested one by one, and less than 4 messages
  * can not generate counter examples
+ *
+ * For the fix plan, pls see the last lines of comments in this file
  */
 check no_bad_states for 2 but 4 Message expect 1 
 
@@ -314,15 +317,16 @@ check no_bad_states for 2 but 4 Message expect 1
 // to one participant and in another state it is connected to some
 // other participant
 
-// (1) a successful run as caller, audio being connected to callee
+/* (1) a successful run as caller, audio being connected to callee */
 pred one_run {
     some callee : Address |
       State.audio = callee
 }
 
-// (2) in one state their audio is connected 
-// to one participant and in another state it is connected to some
-// other participant
+/* (2) in one state their audio is connected 
+ * to one participant and in another state it is connected to some
+ * other participant
+ */
 pred two_run {
   some one_user, another_user : Address |
     State.audio = one_user and 
@@ -330,7 +334,7 @@ pred two_run {
     one_user != another_user
 }
 
-// try run 
+/* try run  */
 run one_run for 3 but 6 Message expect 1
 
 run two_run for 3 but 12 Message expect 1
@@ -344,9 +348,13 @@ check no_bad_states for 2 but 4 Message expect 1
 // to "undo" (or "reverse") your fix so we can then see the vulnerability
 // in your protocol as you describe it in comments above
 
-/* When user is receiving message, system will not check whether the
+/* 
+ * Vulnerability Fix:
+ * When user is receiving message, system will not check whether the
  * message source matches the last callee that the User called or not.
  * As a result, attckers can freely setup a audio connection with client.
  * 
+ * Fix it by adding a message src check in the user receive pre logic.
+ *
  * See: FIX comment in user_recv_pre prediction
  */
