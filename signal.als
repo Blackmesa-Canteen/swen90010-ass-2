@@ -271,7 +271,7 @@ fact {
 assert no_bad_states {
  // FILL IN HERE
  // for all states in the system, no bad state will occur
- all s : State | not my_bad_state[s]
+ always not my_bad_state
 }
 
 // describe the vulnerability that this check identified
@@ -280,12 +280,14 @@ assert no_bad_states {
 // can be seen as described here.
 // FILL IN HERE
 
-// Bad state
-pred my_bad_state[s : State] {
+// Bad state: the User's audio is connected
+// to a participant but the User has not yet decided to call that
+// participant or to answer a call from them
+pred my_bad_state {
   some participant : Address |
-    s.audio = participant and 
-    no s.last_answered and 
-    no s.last_called
+    State.audio = participant and 
+    no State.last_answered and 
+    no State.last_called
 }
 
 // Choose a suitable bound for this check to show hwo the
@@ -294,7 +296,12 @@ pred my_bad_state[s : State] {
 // specifically, what guarantees you think are provided by this check.
 // FILL IN HERE
 // See the assignment handout for more details here.
-check no_bad_states for 8 expect 1 // CHOOSE BOUND HERE
+
+/** check 2 instances in defalt, but 4 messages instances
+ * The this number is tested one by one, and less than 4 messages
+ * can not generate counter examples
+ */
+check no_bad_states for 2 but 4 Message expect 1 
 
 // Alloy "run" commands and predicate definitions to
 // showing successful execution of your (fixed) protocol
@@ -324,11 +331,11 @@ pred two_run {
 }
 
 // try run 
-run one_run for 8 expect 1
+run one_run for 3 but 6 Message expect 1
 
-run two_run for 8 expect 1
+run two_run for 3 but 12 Message expect 1
 
-check no_bad_states for 2 expect 1
+check no_bad_states for 2 but 4 Message expect 1
 
 
 // Describe how you fixed the model to remove the vulnerability
