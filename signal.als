@@ -348,9 +348,9 @@ pred two_run {
 // 或者缺什么always之类的限定? 代码有关message的逻辑应该没问题, 因为
 // check和fix都正常.
 // 其它代码不用改动, 是本来自带的. 可以下载原作业比对下.
-run one_run for 3 but 6 Message expect 1
+run one_run for 2 but 4 Message, 4 Address expect 1
 
-run two_run for 3 but 12 Message expect 1
+run two_run for 2 but 8 Message, 4 Address expect 1
 
 
 // Describe how you fixed the model to remove the vulnerability
