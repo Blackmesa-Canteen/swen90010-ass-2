@@ -299,9 +299,9 @@ pred my_bad_state {
 // See the assignment handout for more details here.
 
 /** 
- * check 2 instances in defalt, but 4 messages instances
- * The scope number is tested one by one, and less than 4 messages
- * can not generate counter examples
+ * check 2 instances in defalt, but 4 messages instances, and 8 states
+ * The scope bound is tested one by one, and less than 4 messages and
+ * 8 states can not generate counter examples
  *
  * From the counter example diagram in Alloy, four messages'
  * Source fields are Attacker Address.
@@ -311,11 +311,11 @@ pred my_bad_state {
  * If apply FIX codes, the following check will generate no counter examples;
  * If comment out FIX codes, the check will generate counter examples.
  */
-check no_bad_states for 2 but 4 Message expect 1 
+check no_bad_states for 2 but 4 Message, 8..8 steps expect 1 
 
 // check the fix for a higher bound 
 // (Use it when fix code is applied, should no counter examples)
-check no_bad_states for 2 but 10 Message, 4 Address
+check no_bad_states for 2 but 10 Message, 4 Address, 16..16 steps
 
 // Alloy "run" commands and predicate definitions to
 // showing successful execution of your (fixed) protocol
@@ -352,9 +352,10 @@ pred two_run {
 // 或者缺什么always之类的限定? 代码有关message的逻辑应该没问题, 因为
 // check和fix都正常.
 // 其它代码不用改动, 是本来自带的. 可以下载原作业比对下.
-run one_run for 2 but 4 Message, 4 Address expect 1
+/* run with 6 Message instances, 3 Address and 8 states */
+run one_run for 2 but 4 Message, 8..8 steps expect 1
 
-run two_run for 2 but 8 Message, 4 Address expect 1
+run two_run for 2 but 8 Message, 3 Address, 16..16 steps expect 1
 
 
 // Describe how you fixed the model to remove the vulnerability
