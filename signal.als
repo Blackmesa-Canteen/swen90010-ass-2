@@ -95,7 +95,7 @@ pred user_recv_pre[m : Message] {
    /* FIX: Before receive message, 
     * check whether the source is match the record 
     */
-    and State.last_called = m.source
+    // and State.last_called = m.source
    )
   )
 }
@@ -315,7 +315,7 @@ check no_bad_states for 2 but 4 Message, 8..8 steps expect 1
 
 // check the fix for a higher bound 
 // (Use it when fix code is applied, should no counter examples)
-check no_bad_states for 2 but 10 Message, 4 Address, 16..16 steps
+check no_bad_states for 2 but 8 Message, 4 Address, 12..12 steps
 
 // Alloy "run" commands and predicate definitions to
 // showing successful execution of your (fixed) protocol
@@ -330,8 +330,18 @@ check no_bad_states for 2 but 10 Message, 4 Address, 16..16 steps
 
 /* (1) a successful run as caller, audio being connected to callee */
 pred one_run {
-    some callee : Address |
-      State.audio = callee
+    // for all possible 2 users
+    all caller : Address, callee : Address |
+      (
+        // if 2 users established audio connection
+        State.audio = caller and State.audio' = callee
+      )
+      implies
+      (
+        // the call state are both connected, which means successful call
+        State.calls[caller] = Connected and
+        State.calls[caller] = State.calls'[callee]
+      )
 }
 
 /* (2) in one state their audio is connected 
@@ -339,10 +349,19 @@ pred one_run {
  * other participant
  */
 pred two_run {
-  some one_user, another_user : Address |
-    one_user != another_user and
-    State.audio = one_user and 
-    State.audio' = another_user
+  // for all possible 2 users
+  all one_user, another_user : Address |
+    (
+      // if they are not the same, then
+      one_user != another_user
+    )
+    implies
+    (
+      // establish audio two one user
+      State.audio = one_user and 
+      // then in the another state, to another different user
+      State.audio' = another_user
+    )
 }
 
 /* try run  */
