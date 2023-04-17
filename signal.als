@@ -335,8 +335,8 @@ check no_bad_states for 2 but 8 Message, 4 Address, 12..12 steps
 
 /* (1) a successful run as caller, audio being connected to callee */
 pred one_run {
-    // for all possible users
-    all callee : Address |
+    // for some users as callee
+    some callee : Address |
       (
         // if user is the callee, who has been connected to
         State.audio = callee
@@ -358,8 +358,8 @@ pred one_run {
  * other participant
  */
 pred two_run {
-  // for all possible 2 users
-  all one_user, another_user : Address |
+  // some 2 user pair
+  some one_user, another_user : Address |
     (
       // if they are not the same, then
       one_user != another_user
