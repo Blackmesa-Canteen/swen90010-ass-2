@@ -335,21 +335,21 @@ check no_bad_states for 2 but 8 Message, 4 Address, 12..12 steps
 
 /* (1) a successful run as caller, audio being connected to callee */
 pred one_run {
-    // for all possible 2 users
-    all caller : Address, callee : Address |
+    // for all possible users
+    all callee : Address |
       (
-        // if 2 users established audio connection
-        State.audio = caller and State.audio' = callee
+        // if user is the callee, who has been connected to
+        State.audio = callee
       )
       implies
       (
-        /* The calls from both users are in same state, 
+        /* The calls state is successful, 
          * like connected or SignallingComplete, 
          * which means successful call.
          */
         // Ignore connected according to announcement
-        // State.calls[caller] = Connected and
-        State.calls[caller] = State.calls'[callee]
+        // State.calls[callee] = Connected
+        State.calls[callee] = SignallingComplete
       )
 }
 
