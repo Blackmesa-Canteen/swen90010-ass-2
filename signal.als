@@ -95,7 +95,7 @@ pred user_recv_pre[m : Message] {
    /* FIX: Before receive message, 
     * check whether the source is match the record 
     */
-    // and State.last_called = m.source
+    and State.last_called = m.source
    )
   )
 }
@@ -309,9 +309,13 @@ pred my_bad_state {
  * For the fix plan, pls see the last lines of comments in this file
  * 
  * If apply FIX codes, the following check will generate no counter examples;
- * If comment FIX codes, the check will generate counter examples.
+ * If comment out FIX codes, the check will generate counter examples.
  */
 check no_bad_states for 2 but 4 Message expect 1 
+
+// check the fix for a higher bound 
+// (Use it when fix code is applied, should no counter examples)
+check no_bad_states for 2 but 10 Message, 4 Address
 
 // Alloy "run" commands and predicate definitions to
 // showing successful execution of your (fixed) protocol
@@ -336,9 +340,9 @@ pred one_run {
  */
 pred two_run {
   some one_user, another_user : Address |
+    one_user != another_user and
     State.audio = one_user and 
-    State.audio' = another_user and 
-    one_user != another_user
+    State.audio' = another_user
 }
 
 /* try run  */
