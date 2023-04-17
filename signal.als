@@ -95,7 +95,7 @@ pred user_recv_pre[m : Message] {
    /* FIX: Before receive message, 
     * check whether the source is match the record 
     */
-    // and State.last_called = m.source
+    and State.last_called = m.source
    )
   )
 }
@@ -304,7 +304,8 @@ pred my_bad_state {
  * 8 states can not generate counter examples
  *
  * From the counter example diagram in Alloy, four messages'
- * Source fields are Attacker Address.
+ * Source fields are Attacker Address, and call states are not 
+ * ready to connect.
  *
  * For the fix plan, pls see the last lines of comments in this file
  * 
@@ -387,7 +388,8 @@ run two_run for 2 but 8 Message, 3 Address, 16..16 steps expect 1
  * Vulnerability Fix:
  * When user is receiving message, system will not check whether the
  * message source matches the last callee that the User called or not.
- * As a result, attckers can freely setup a audio connection with client.
+ * As a result, attckers can freely setup a audio connection with client,
+ * no matter what the client state is in.
  * 
  * Fix it by adding a message src check in the user receive pre logic.
  *
