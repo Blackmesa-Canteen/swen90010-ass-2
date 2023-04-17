@@ -129,7 +129,9 @@ pred user_send_post[m : Message] {
     State.audio' = State.audio) or  
 
    (m.type in Connect and 
-    State.calls' = State.calls ++ (m.dest -> Connected) and
+    // Ignore Connected according to announcement
+    // State.calls' = State.calls ++ (m.dest -> Connected) and
+    State.calls' = State.calls and
     /* Sending the Connect message causes 
      * the audio to be connected to the message’s destination
      */
@@ -170,7 +172,9 @@ pred user_recv_post[m : Message] {
     State.audio' = State.audio) or
 
    (m.type in Connect and
-    State.calls' = State.calls ++ (m.source -> Connected) and
+    // Ignore Connected according to announcement
+    // State.calls' = State.calls ++ (m.source -> Connected) and
+    State.calls' = State.calls and
     State.ringing' = State.ringing and
 
     /* receiving the Connect message causes the audio to be 
@@ -339,8 +343,12 @@ pred one_run {
       )
       implies
       (
-        // the call state are both connected, which means successful call
-        State.calls[caller] = Connected and
+        /* The calls from both users are in same state, 
+         * like connected or SignallingComplete, 
+         * which means successful call.
+         */
+        // Ignore connected according to announcement
+        // State.calls[caller] = Connected and
         State.calls[caller] = State.calls'[callee]
       )
 }
