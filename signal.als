@@ -363,7 +363,7 @@ pred two_run {
     (
       // If two different users, and
       one_user != another_user and
-      // they one state, user connect to one user,
+      // in one state, user connect to one user,
       State.audio = one_user 
     )
     implies
