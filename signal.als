@@ -366,12 +366,6 @@ pred two_run {
 }
 
 /* try run  */
-// 这俩应该是能生成instances的, 就是说运行后有满足这个条件的state,
-// 可能要试试调整这个for ... but ...的scope数目, 大概率是scope问题
-// FILL IN或者/**/注释下面的代码逻辑可以检查下, 是我写的, 没准是什么错误导致audio状态没正常改变, 
-// 或者缺什么always之类的限定? 代码有关message的逻辑应该没问题, 因为
-// check和fix都正常.
-// 其它代码不用改动, 是本来自带的. 可以下载原作业比对下.
 /* run with 6 Message instances, 3 Address and 8 states */
 run one_run for 2 but 4 Message, 8..8 steps expect 1
 
